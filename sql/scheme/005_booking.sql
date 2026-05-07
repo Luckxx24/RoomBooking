@@ -9,7 +9,7 @@ create table booking(
     start_time timestamptz not null,
     end_time timestamptz not null,
     total_price numeric(10,2) not null,
-    status stats not null
+    status stats not null,
 );
 
 -- +goose down
