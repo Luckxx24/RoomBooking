@@ -2,7 +2,7 @@
 
 create table fasilitas(
     id uuid primary key not null,
-    fasilitas varchar not null,
+    fasilitas varchar not null
 );
 
 -- +goose down

@@ -1,4 +1,6 @@
--- goose up
+-- +goose up
+
+create type stats as enum('pending','approved','done');
 
 create table booking(
     id uuid primary key not null,
@@ -7,5 +9,10 @@ create table booking(
     start_time timestamptz not null,
     end_time timestamptz not null,
     total_price numeric(10,2) not null,
-    status 
-)
+    status stats not null
+);
+
+-- +goose down
+
+drop type if exists stats;
+drop table if exists booking;
