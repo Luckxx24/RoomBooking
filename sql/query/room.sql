@@ -1,4 +1,4 @@
--- name: createroom :one
+-- name: Createroom :one
 
 insert into rooms(
     id,nama,kapasitas,price_per_hour,description 

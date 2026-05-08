@@ -11,6 +11,44 @@ import (
 	"github.com/google/uuid"
 )
 
+const createroom = `-- name: Createroom :one
+
+insert into rooms(
+    id,nama,kapasitas,price_per_hour,description 
+) values(
+    $1,$2,$3,$4,$5
+)
+
+RETURNING id, nama, kapasitas, price_per_hour, description
+`
+
+type CreateroomParams struct {
+	ID           uuid.UUID
+	Nama         string
+	Kapasitas    int32
+	PricePerHour string
+	Description  string
+}
+
+func (q *Queries) Createroom(ctx context.Context, arg CreateroomParams) (Room, error) {
+	row := q.db.QueryRowContext(ctx, createroom,
+		arg.ID,
+		arg.Nama,
+		arg.Kapasitas,
+		arg.PricePerHour,
+		arg.Description,
+	)
+	var i Room
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.Kapasitas,
+		&i.PricePerHour,
+		&i.Description,
+	)
+	return i, err
+}
+
 const deleteRoom = `-- name: DeleteRoom :exec
 
 Delete from rooms where id = $1
@@ -119,44 +157,6 @@ func (q *Queries) UpdateRoom(ctx context.Context, arg UpdateRoomParams) (Room, e
 		arg.PricePerHour,
 		arg.Description,
 		arg.ID,
-	)
-	var i Room
-	err := row.Scan(
-		&i.ID,
-		&i.Nama,
-		&i.Kapasitas,
-		&i.PricePerHour,
-		&i.Description,
-	)
-	return i, err
-}
-
-const createroom = `-- name: createroom :one
-
-insert into rooms(
-    id,nama,kapasitas,price_per_hour,description 
-) values(
-    $1,$2,$3,$4,$5
-)
-
-RETURNING id, nama, kapasitas, price_per_hour, description
-`
-
-type createroomParams struct {
-	ID           uuid.UUID
-	Nama         string
-	Kapasitas    int32
-	PricePerHour string
-	Description  string
-}
-
-func (q *Queries) createroom(ctx context.Context, arg createroomParams) (Room, error) {
-	row := q.db.QueryRowContext(ctx, createroom,
-		arg.ID,
-		arg.Nama,
-		arg.Kapasitas,
-		arg.PricePerHour,
-		arg.Description,
 	)
 	var i Room
 	err := row.Scan(
