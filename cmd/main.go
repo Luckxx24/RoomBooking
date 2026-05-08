@@ -9,7 +9,7 @@ import (
 
 func main() {
 	config := config{
-		Addr: env.GetString("ADDR", "X"),
+		Addr: env.GetString("ADDR", "postgres://Lucky:108099@localhost:5433/BookingRoom?sslmode=disable"),
 		DBconfig: dbconfig{
 			Addr:        env.GetString("Addr", "8080"),
 			Maxopencons: env.GetInt("opencons", 30),
