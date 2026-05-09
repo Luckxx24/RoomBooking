@@ -3,8 +3,10 @@ package main
 import (
 	"log"
 
+	"github.com/luckxx24/RoomBooking/service"
 	"github.com/luckxx24/RoomBooking/settings/db"
 	"github.com/luckxx24/RoomBooking/settings/env"
+	"github.com/luckxx24/RoomBooking/store"
 )
 
 func main() {
@@ -23,4 +25,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	store := store.NewStorage(db)
+
+	Service := service.Service{
+		Store: store,
+	}
+
+	app := Application{
+		Config:  config,
+		Store:   store,
+		Service: Service,
+	}
+
+	mux := app.Mount()
+
+	log.Fatal(app.run(mux))
 }

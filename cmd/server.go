@@ -8,6 +8,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/luckxx24/RoomBooking/service"
+	"github.com/luckxx24/RoomBooking/store"
 )
 
 type dbconfig struct {
@@ -23,7 +25,9 @@ type config struct {
 }
 
 type Application struct {
-	Config config
+	Config  config
+	Store   store.Storage
+	Service service.Service
 }
 
 func (app *Application) Mount() http.Handler {
