@@ -16,7 +16,7 @@ select nama,email,hash_password,role from users where id = $1;
 
 -- name: GetUserslist :many
 
-select nama,email,hash_password from users where id = $1 order by created_at desc LIMIT $2 OFFSET $3;
+select nama,email,hash_password from users order by created_at desc LIMIT $1 OFFSET $2;
 
 -- name: UpdateUser :one
 

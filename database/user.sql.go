@@ -89,11 +89,10 @@ func (q *Queries) GetUsers(ctx context.Context, id uuid.UUID) (GetUsersRow, erro
 
 const getUserslist = `-- name: GetUserslist :many
 
-select nama,email,hash_password from users where id = $1 order by created_at desc LIMIT $2 OFFSET $3
+select nama,email,hash_password from users order by created_at desc LIMIT $1 OFFSET $2
 `
 
 type GetUserslistParams struct {
-	ID     uuid.UUID
 	Limit  int32
 	Offset int32
 }
@@ -105,7 +104,7 @@ type GetUserslistRow struct {
 }
 
 func (q *Queries) GetUserslist(ctx context.Context, arg GetUserslistParams) ([]GetUserslistRow, error) {
-	rows, err := q.db.QueryContext(ctx, getUserslist, arg.ID, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, getUserslist, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
