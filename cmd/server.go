@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/luckxx24/RoomBooking/JWT/auth"
 	"github.com/luckxx24/RoomBooking/service"
 	"github.com/luckxx24/RoomBooking/store"
 )
@@ -28,6 +29,7 @@ type Application struct {
 	Config  config
 	Store   store.Storage
 	Service service.Service
+	Token   auth.TokenUtil
 }
 
 func (app *Application) Mount() http.Handler {

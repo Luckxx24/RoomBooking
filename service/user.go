@@ -15,10 +15,18 @@ func (S *Service) CreateUser(ctx context.Context, nama, email, HashPassword, Rol
 	if !ok {
 		return database.User{}, errors.New("role rusak/tidak ditemukan")
 	}
-	S.Store.Users.CreateUsers(ctx, database.CreateUsersParams{
+	User, err := S.Store.Users.CreateUsers(ctx, database.CreateUsersParams{
 		ID:           uuid.New(),
 		Email:        email,
 		HashPassword: HashPassword,
 		Role:         database.Roles(Role),
 	})
+
+	if err != nil {
+		return database.User{}, err
+	}
+
+	return User, nil
 }
+
+func (S *Service) GetUser(ctx context.Context)

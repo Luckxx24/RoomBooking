@@ -12,7 +12,7 @@ RETURNING *;
 
 -- name: GetUsers :one
 
-select nama,email,hash_password from users where id = $1;
+select nama,email,hash_password,role from users where id = $1;
 
 -- name: GetUserslist :many
 

@@ -65,19 +65,25 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 
 const getUsers = `-- name: GetUsers :one
 
-select nama,email,hash_password from users where id = $1
+select nama,email,hash_password,role from users where id = $1
 `
 
 type GetUsersRow struct {
 	Nama         string
 	Email        string
 	HashPassword string
+	Role         Roles
 }
 
 func (q *Queries) GetUsers(ctx context.Context, id uuid.UUID) (GetUsersRow, error) {
 	row := q.db.QueryRowContext(ctx, getUsers, id)
 	var i GetUsersRow
-	err := row.Scan(&i.Nama, &i.Email, &i.HashPassword)
+	err := row.Scan(
+		&i.Nama,
+		&i.Email,
+		&i.HashPassword,
+		&i.Role,
+	)
 	return i, err
 }
 

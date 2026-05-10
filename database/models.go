@@ -113,6 +113,12 @@ type Fasilita struct {
 	Nama string
 }
 
+type FasilitasRuangan struct {
+	ID          uuid.UUID
+	IDRoom      uuid.UUID
+	IDFasilitas uuid.UUID
+}
+
 type Room struct {
 	ID           uuid.UUID
 	Nama         string

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/luckxx24/RoomBooking/JWT/auth"
 	"github.com/luckxx24/RoomBooking/service"
 	"github.com/luckxx24/RoomBooking/settings/db"
 	"github.com/luckxx24/RoomBooking/settings/env"
@@ -32,10 +33,13 @@ func main() {
 		Store: store,
 	}
 
+	Token := auth.SecretKey(env.GetString("rahasia", "rahasia"))
+
 	app := Application{
 		Config:  config,
 		Store:   store,
 		Service: Service,
+		Token:   Token,
 	}
 
 	mux := app.Mount()
