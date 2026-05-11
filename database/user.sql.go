@@ -20,7 +20,7 @@ insert into users(
     $1,$2,$3,$4,$5,$6
 )
 
-RETURNING id, nama, email, hash_password, role, created_at
+RETURNING id, nama, email, hash_password, role, created_at, updated_at
 `
 
 type CreateUsersParams struct {
@@ -49,6 +49,7 @@ func (q *Queries) CreateUsers(ctx context.Context, arg CreateUsersParams) (User,
 		&i.HashPassword,
 		&i.Role,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -129,7 +130,7 @@ func (q *Queries) GetUserslist(ctx context.Context, arg GetUserslistParams) ([]G
 const updateUser = `-- name: UpdateUser :one
 
 update users set nama = $1, email = $2 , hash_password = $3 where id = $4
-RETURNING id, nama, email, hash_password, role, created_at
+RETURNING id, nama, email, hash_password, role, created_at, updated_at
 `
 
 type UpdateUserParams struct {
@@ -154,6 +155,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.HashPassword,
 		&i.Role,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

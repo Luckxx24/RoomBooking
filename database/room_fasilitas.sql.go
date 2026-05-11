@@ -18,7 +18,7 @@ insert into fasilitas_ruangan(
 ) values (
     $1,$2,$3
 )
-RETURNING id, id_room, id_fasilitas
+RETURNING id, id_room, id_fasilitas, created_at, updated_at
 `
 
 type CreateFasilitas_RuanganParams struct {
@@ -30,6 +30,12 @@ type CreateFasilitas_RuanganParams struct {
 func (q *Queries) CreateFasilitas_Ruangan(ctx context.Context, arg CreateFasilitas_RuanganParams) (FasilitasRuangan, error) {
 	row := q.db.QueryRowContext(ctx, createFasilitas_Ruangan, arg.ID, arg.IDRoom, arg.IDFasilitas)
 	var i FasilitasRuangan
-	err := row.Scan(&i.ID, &i.IDRoom, &i.IDFasilitas)
+	err := row.Scan(
+		&i.ID,
+		&i.IDRoom,
+		&i.IDFasilitas,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
 	return i, err
 }

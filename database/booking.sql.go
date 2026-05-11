@@ -19,7 +19,7 @@ insert into booking(
 )values(
     $1,$2,$3,$4,$5,$6,$7
 )
-RETURNING id, id_user, id_rooms, start_time, end_time, total_price, status
+RETURNING id, id_user, id_rooms, start_time, end_time, total_price, status, created_at, updated_at
 `
 
 type CreateBookingParams struct {
@@ -51,6 +51,8 @@ func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (B
 		&i.EndTime,
 		&i.TotalPrice,
 		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -118,7 +120,7 @@ func (q *Queries) GetBooking(ctx context.Context, arg GetBookingParams) ([]GetBo
 const updateBooking = `-- name: UpdateBooking :one
 
 update booking set start_time = $1,end_time = $2,status = $3, total_price = $4 where id = $5
-RETURNING id, id_user, id_rooms, start_time, end_time, total_price, status
+RETURNING id, id_user, id_rooms, start_time, end_time, total_price, status, created_at, updated_at
 `
 
 type UpdateBookingParams struct {
@@ -146,6 +148,8 @@ func (q *Queries) UpdateBooking(ctx context.Context, arg UpdateBookingParams) (B
 		&i.EndTime,
 		&i.TotalPrice,
 		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

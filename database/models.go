@@ -106,17 +106,23 @@ type Booking struct {
 	EndTime    time.Time
 	TotalPrice string
 	Status     Stats
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 type Fasilita struct {
-	ID   uuid.UUID
-	Nama string
+	ID        uuid.UUID
+	Nama      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type FasilitasRuangan struct {
 	ID          uuid.UUID
 	IDRoom      uuid.UUID
 	IDFasilitas uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type Room struct {
@@ -125,6 +131,8 @@ type Room struct {
 	Kapasitas    int32
 	PricePerHour string
 	Description  string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 type User struct {
@@ -134,4 +142,5 @@ type User struct {
 	HashPassword string
 	Role         Roles
 	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }

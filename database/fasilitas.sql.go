@@ -19,7 +19,7 @@ insert into fasilitas(
 ) values(
     $1,$2
 )
-RETURNING id, nama
+RETURNING id, nama, created_at, updated_at
 `
 
 type CreateFasilitasParams struct {
@@ -30,7 +30,12 @@ type CreateFasilitasParams struct {
 func (q *Queries) CreateFasilitas(ctx context.Context, arg CreateFasilitasParams) (Fasilita, error) {
 	row := q.db.QueryRowContext(ctx, createFasilitas, arg.ID, arg.Nama)
 	var i Fasilita
-	err := row.Scan(&i.ID, &i.Nama)
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
 	return i, err
 }
 
@@ -59,7 +64,7 @@ func (q *Queries) GetFasilitas(ctx context.Context, id uuid.UUID) (string, error
 const updatefasilitas = `-- name: Updatefasilitas :one
 
 update fasilitas set nama = $1 where id = $2
-RETURNING id, nama
+RETURNING id, nama, created_at, updated_at
 `
 
 type UpdatefasilitasParams struct {
@@ -70,6 +75,11 @@ type UpdatefasilitasParams struct {
 func (q *Queries) Updatefasilitas(ctx context.Context, arg UpdatefasilitasParams) (Fasilita, error) {
 	row := q.db.QueryRowContext(ctx, updatefasilitas, arg.Nama, arg.ID)
 	var i Fasilita
-	err := row.Scan(&i.ID, &i.Nama)
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
 	return i, err
 }

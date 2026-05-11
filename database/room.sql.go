@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -14,12 +15,12 @@ import (
 const createroom = `-- name: Createroom :one
 
 insert into rooms(
-    id,nama,kapasitas,price_per_hour,description 
+    id,nama,kapasitas,price_per_hour,description,created_at,updated_at
 ) values(
-    $1,$2,$3,$4,$5
+    $1,$2,$3,$4,$5,$6,$7
 )
 
-RETURNING id, nama, kapasitas, price_per_hour, description
+RETURNING id, nama, kapasitas, price_per_hour, description, created_at, updated_at
 `
 
 type CreateroomParams struct {
@@ -28,6 +29,8 @@ type CreateroomParams struct {
 	Kapasitas    int32
 	PricePerHour string
 	Description  string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (q *Queries) Createroom(ctx context.Context, arg CreateroomParams) (Room, error) {
@@ -37,6 +40,8 @@ func (q *Queries) Createroom(ctx context.Context, arg CreateroomParams) (Room, e
 		arg.Kapasitas,
 		arg.PricePerHour,
 		arg.Description,
+		arg.CreatedAt,
+		arg.UpdatedAt,
 	)
 	var i Room
 	err := row.Scan(
@@ -45,6 +50,8 @@ func (q *Queries) Createroom(ctx context.Context, arg CreateroomParams) (Room, e
 		&i.Kapasitas,
 		&i.PricePerHour,
 		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -139,7 +146,7 @@ func (q *Queries) GetRoomDetail(ctx context.Context, arg GetRoomDetailParams) (G
 const updateRoom = `-- name: UpdateRoom :one
 
 update rooms set nama = $1, kapasitas = $2, price_per_hour = $3, description = $4 where id = $5
-RETURNING id, nama, kapasitas, price_per_hour, description
+RETURNING id, nama, kapasitas, price_per_hour, description, created_at, updated_at
 `
 
 type UpdateRoomParams struct {
@@ -165,6 +172,8 @@ func (q *Queries) UpdateRoom(ctx context.Context, arg UpdateRoomParams) (Room, e
 		&i.Kapasitas,
 		&i.PricePerHour,
 		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

@@ -1,9 +1,9 @@
 -- name: Createroom :one
 
 insert into rooms(
-    id,nama,kapasitas,price_per_hour,description 
+    id,nama,kapasitas,price_per_hour,description,created_at,updated_at
 ) values(
-    $1,$2,$3,$4,$5
+    $1,$2,$3,$4,$5,$6,$7
 )
 
 RETURNING *;
