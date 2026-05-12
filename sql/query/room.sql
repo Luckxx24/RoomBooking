@@ -18,7 +18,7 @@ select r.nama,r.kapasitas,r.price_per_hour,r.kapasitas,b.status as booking_statu
 
 -- name: UpdateRoom :one
 
-update rooms set nama = $1, kapasitas = $2, price_per_hour = $3, description = $4 where id = $5
+update rooms set nama = $1, kapasitas = $2, price_per_hour = $3, description = $4,updated_at = $5 where id = $6
 RETURNING *;
 
 -- name: DeleteRoom :exec

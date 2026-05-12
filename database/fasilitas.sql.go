@@ -51,14 +51,31 @@ func (q *Queries) DeleteFasilitas(ctx context.Context, id uuid.UUID) error {
 
 const getFasilitas = `-- name: GetFasilitas :one
 
-select nama from fasilitas where id = $1
+select id, nama, created_at, updated_at from fasilitas
 `
 
-func (q *Queries) GetFasilitas(ctx context.Context, id uuid.UUID) (string, error) {
-	row := q.db.QueryRowContext(ctx, getFasilitas, id)
-	var nama string
-	err := row.Scan(&nama)
-	return nama, err
+func (q *Queries) GetFasilitas(ctx context.Context) (Fasilita, error) {
+	row := q.db.QueryRowContext(ctx, getFasilitas)
+	var i Fasilita
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getFasilitasByID = `-- name: GetFasilitasByID :one
+
+select id from fasilitas
+`
+
+func (q *Queries) GetFasilitasByID(ctx context.Context) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, getFasilitasByID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
 const updatefasilitas = `-- name: Updatefasilitas :one

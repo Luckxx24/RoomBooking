@@ -10,7 +10,7 @@ import (
 type Fasilitas interface {
 	CreateFasilitas(ctx context.Context, arg database.CreateFasilitasParams) (database.Fasilita, error)
 	DeleteFasilitas(ctx context.Context, id uuid.UUID) error
-	GetFasilitas(ctx context.Context, id uuid.UUID) (string, error)
+	GetFasilitas(ctx context.Context) (database.Fasilita, error)
 	Updatefasilitas(ctx context.Context, arg database.UpdatefasilitasParams) (database.Fasilita, error)
 }
 
@@ -26,10 +26,14 @@ func (f fasilitas) DeleteFasilitas(ctx context.Context, id uuid.UUID) error {
 	return f.q.DeleteFasilitas(ctx, id)
 }
 
-func (f fasilitas) GetFasilitas(ctx context.Context, id uuid.UUID) (string, error) {
-	return f.q.GetFasilitas(ctx, id)
+func (f fasilitas) GetFasilitas(ctx context.Context) (database.Fasilita, error) {
+	return f.q.GetFasilitas(ctx)
 }
 
 func (f fasilitas) Updatefasilitas(ctx context.Context, arg database.UpdatefasilitasParams) (database.Fasilita, error) {
 	return f.q.Updatefasilitas(ctx, arg)
+}
+
+func (f fasilitas) GetFasilitasByID(ctx context.Context, id uuid.UUID) (database.Fasilita, error) {
+	return f.q.GetFasilitasByID(ctx, id)
 }

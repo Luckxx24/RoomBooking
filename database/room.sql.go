@@ -145,7 +145,7 @@ func (q *Queries) GetRoomDetail(ctx context.Context, arg GetRoomDetailParams) (G
 
 const updateRoom = `-- name: UpdateRoom :one
 
-update rooms set nama = $1, kapasitas = $2, price_per_hour = $3, description = $4 where id = $5
+update rooms set nama = $1, kapasitas = $2, price_per_hour = $3, description = $4,updated_at = $5 where id = $6
 RETURNING id, nama, kapasitas, price_per_hour, description, created_at, updated_at
 `
 
@@ -154,6 +154,7 @@ type UpdateRoomParams struct {
 	Kapasitas    int32
 	PricePerHour string
 	Description  string
+	UpdatedAt    time.Time
 	ID           uuid.UUID
 }
 
@@ -163,6 +164,7 @@ func (q *Queries) UpdateRoom(ctx context.Context, arg UpdateRoomParams) (Room, e
 		arg.Kapasitas,
 		arg.PricePerHour,
 		arg.Description,
+		arg.UpdatedAt,
 		arg.ID,
 	)
 	var i Room

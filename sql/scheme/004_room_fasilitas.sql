@@ -2,7 +2,7 @@
 
 create table fasilitas_ruangan(
     id uuid primary key not null,
-    id_room uuid references rooms(id) not null,
+    id_room uuid not null references rooms(id)  on Delete cascade,
     id_fasilitas uuid references fasilitas(id) not null
 );
 

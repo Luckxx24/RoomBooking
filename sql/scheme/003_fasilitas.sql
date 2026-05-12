@@ -7,4 +7,4 @@ create table fasilitas(
 
 -- +goose down
 
-Drop table if exists fasilitas
+Drop table if exists fasilitas;

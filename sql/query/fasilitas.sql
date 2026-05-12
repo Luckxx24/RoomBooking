@@ -10,7 +10,7 @@ RETURNING *;
 
 -- name: GetFasilitas :one
 
-select nama from fasilitas where id = $1;
+select * from fasilitas ;
 
 -- name: Updatefasilitas :one
 
@@ -20,3 +20,7 @@ RETURNING *;
 -- name: DeleteFasilitas :exec
 
 Delete from fasilitas where id = $1;
+
+-- name: GetFasilitasByID :one
+
+select id from fasilitas where id = 1$;
