@@ -68,14 +68,14 @@ func (q *Queries) GetFasilitas(ctx context.Context) (Fasilita, error) {
 
 const getFasilitasByID = `-- name: GetFasilitasByID :one
 
-select id from fasilitas
+select id from fasilitas where id = $1
 `
 
-func (q *Queries) GetFasilitasByID(ctx context.Context) (uuid.UUID, error) {
-	row := q.db.QueryRowContext(ctx, getFasilitasByID)
-	var id uuid.UUID
-	err := row.Scan(&id)
-	return id, err
+func (q *Queries) GetFasilitasByID(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, getFasilitasByID, id)
+	var id_2 uuid.UUID
+	err := row.Scan(&id_2)
+	return id_2, err
 }
 
 const updatefasilitas = `-- name: Updatefasilitas :one

@@ -23,4 +23,4 @@ Delete from fasilitas where id = $1;
 
 -- name: GetFasilitasByID :one
 
-select id from fasilitas where id = 1$;
+select id from fasilitas where id = $1;

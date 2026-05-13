@@ -9,5 +9,15 @@ insert into fasilitas_ruangan(
 )
 RETURNING *;
 
+-- name: GetFasilitas_Ruangan :one
+
+Select * from fasilitas_ruangan;
+
+-- name: DeleteFasilitas_Ruangan :exec
+
+Delete from fasilitas_ruangan where id_room = $1;
+
+
+
 
 

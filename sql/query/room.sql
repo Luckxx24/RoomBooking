@@ -14,7 +14,10 @@ select r.nama,r.kapasitas,r.price_per_hour,b.status as booking_status from rooms
 
 -- name: GetRoomDetail :one
 
-select r.nama,r.kapasitas,r.price_per_hour,r.kapasitas,b.status as booking_status from rooms r inner join booking b on b.id_rooms = r.id where r.id = $1 OFFSET $2 LIMIT $3;
+select r.nama,r.kapasitas,r.price_per_hour,r.kapasitas,f.fasilitas as room_fasilitas ,b.status as booking_status from rooms r 
+inner join booking b on b.id_rooms = r.id 
+inner join room_fasilitas rf on rf id_room = r.id 
+inner join fasilitas f on f.id = rf.id where r.id = $1;
 
 -- name: UpdateRoom :one
 

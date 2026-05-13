@@ -39,3 +39,55 @@ func (q *Queries) CreateFasilitas_Ruangan(ctx context.Context, arg CreateFasilit
 	)
 	return i, err
 }
+
+const deleteFasilitas_Ruangan = `-- name: DeleteFasilitas_Ruangan :exec
+
+Delete from fasilitas_ruangan where id = $1
+`
+
+func (q *Queries) DeleteFasilitas_Ruangan(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteFasilitas_Ruangan, id)
+	return err
+}
+
+const getFasilitas_Ruangan = `-- name: GetFasilitas_Ruangan :one
+
+Select id, id_room, id_fasilitas, created_at, updated_at from fasilitas_ruangan
+`
+
+func (q *Queries) GetFasilitas_Ruangan(ctx context.Context) (FasilitasRuangan, error) {
+	row := q.db.QueryRowContext(ctx, getFasilitas_Ruangan)
+	var i FasilitasRuangan
+	err := row.Scan(
+		&i.ID,
+		&i.IDRoom,
+		&i.IDFasilitas,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateFasilitas = `-- name: UpdateFasilitas :one
+
+update fasilitas_ruangan set id_fasilitas = $1 where id_room = $2
+RETURNING id, id_room, id_fasilitas, created_at, updated_at
+`
+
+type UpdateFasilitasParams struct {
+	IDFasilitas uuid.UUID
+	IDRoom      uuid.UUID
+}
+
+func (q *Queries) UpdateFasilitas(ctx context.Context, arg UpdateFasilitasParams) (FasilitasRuangan, error) {
+	row := q.db.QueryRowContext(ctx, updateFasilitas, arg.IDFasilitas, arg.IDRoom)
+	var i FasilitasRuangan
+	err := row.Scan(
+		&i.ID,
+		&i.IDRoom,
+		&i.IDFasilitas,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

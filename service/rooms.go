@@ -17,7 +17,7 @@ func HelperGetID(r *http.Request) (uuid.UUID, error) {
 	RoomIDstr := chi.URLParam(r, "id_room")
 
 	if RoomIDstr == " " {
-		return uuid.Nil, errors.New("gagal mendapatkan ID dari middleware")
+		return uuid.Nil, errors.New("gagal mendapatkan ID dari url param")
 	}
 
 	RoomsID, errs := uuid.Parse(RoomIDstr)
@@ -29,15 +29,33 @@ func HelperGetID(r *http.Request) (uuid.UUID, error) {
 	return RoomsID, nil
 }
 
-type FasilitasCompleted struct {
-	nama         string
-	deskripsi    string
-	kapasitas    int32
-	PricePerHOur string
-	id_fasilitas []uuid.UUID
+func HelperGetIDfasilitas(r *http.Request) (uuid.UUID, error) {
+	FasilitasIDstr := chi.URLParam(r, "id_fasilitas")
+
+	if FasilitasIDstr == " " {
+		return uuid.Nil, errors.New("gagal mendapatkan ID dari url param")
+	}
+
+	FasilitasID, errs := uuid.Parse(FasilitasIDstr)
+
+	if errs != nil {
+		return uuid.Nil, errs
+	}
+
+	return FasilitasID, nil
 }
 
 func (S *Service) CreateRooms(ctx context.Context) (database.Room, error) {
+
+	type CRoomsFasility struct {
+		nama         string
+		deskripsi    string
+		kapasitas    int32
+		PricePerHOur string
+		id_fasilitas []uuid.UUID
+	}
+	var Req CRoomsFasility
+
 	tx, errs := S.Store.DB.BeginTx(ctx, nil)
 
 	if errs != nil {
@@ -46,10 +64,9 @@ func (S *Service) CreateRooms(ctx context.Context) (database.Room, error) {
 
 	}
 
-	var Req FasilitasCompleted
 	Txstore := store.NewTX(tx)
 
-	if Req.nama == " " || Req.deskripsi == " " || Req.kapasitas <= 0 {
+	if Req.nama == " " || Req.deskripsi == " " || Req.kapasitas <= 0 || Req.PricePerHOur == " " {
 		return database.Room{}, errors.New("kolom tidak bileh kosong")
 	}
 	Role, oke := middleware.GetRoleFromContext(ctx)
@@ -76,11 +93,27 @@ func (S *Service) CreateRooms(ctx context.Context) (database.Room, error) {
 		return database.Room{}, err
 	}
 
-	if len(Req.id_fasilitas) < 0 {
+	if len(Req.id_fasilitas) <= 0 {
 		return database.Room{}, errors.New("mohon masukan fasilitas")
 	}
-	range
-	tx.Commit()
+
+	for _, id_fasilitas := range Req.id_fasilitas {
+		_, erros := Txstore.RoomFasilitas.CreateFasilitas_Ruangan(ctx, database.CreateFasilitas_RuanganParams{
+			ID:          uuid.New(),
+			IDRoom:      Rooms.ID,
+			IDFasilitas: id_fasilitas,
+		})
+		if erros != nil {
+			tx.Rollback()
+			return database.Room{}, erros
+		}
+	}
+
+	errr := tx.Commit()
+
+	if errr != nil {
+		return database.Room{}, errr
+	}
 	return Rooms, nil
 
 }
@@ -89,16 +122,52 @@ func (S *Service) GetRooms(ctx context.Context, Page, Pagesize int) ([]database.
 
 	HelperPage(Page, Pagesize)
 
-	Rooms, err := S.Store.Room.GetRoom(ctx, database.GetRoomParams{})
+	tx, errs := S.Store.DB.Begin()
+
+	if errs != nil {
+		tx.Rollback()
+		return []database.GetRoomRow{}, errs
+	}
+
+	txdb := store.NewTX(tx)
+
+	Rooms, err := txdb.Room.GetRoom(ctx, database.GetRoomParams{})
 
 	if err != nil {
+		tx.Rollback()
 		return []database.GetRoomRow{}, err
 	}
 
 	return Rooms, nil
 }
 
+func (S *Service) GetRoomsDetail(ctx context.Context, r *http.Request) (database.GetRoomDetailRow, error) {
+	id_room, errs := HelperGetID(r)
+
+	if errs != nil {
+		return database.GetRoomDetailRow{}, errs
+	}
+	room, err := S.Store.Room.GetRoomDetail(ctx, database.GetRoomDetailParams{
+		ID: id_room,
+	})
+
+	if err != nil {
+		return database.GetRoomDetailRow{}, err
+	}
+
+	return room, nil
+}
+
 func (S *Service) UpdateRooms(ctx context.Context, nama, deskripsi string, kapasitas int32, r *http.Request) (database.Room, error) {
+
+	type URoomsFasility struct {
+		nama         string
+		deskripsi    string
+		kapasitas    int32
+		PricePerHOur string
+		id_fasilitas []uuid.UUID
+	}
+	var UReq URoomsFasility
 
 	RoomID, errs := HelperGetID(r)
 
@@ -106,19 +175,59 @@ func (S *Service) UpdateRooms(ctx context.Context, nama, deskripsi string, kapas
 		return database.Room{}, errs
 	}
 
-	Rooms, err := S.Store.Room.UpdateRoom(ctx, database.UpdateRoomParams{
-		ID:           RoomID,
-		Nama:         nama,
-		Kapasitas:    kapasitas,
-		PricePerHour: PricePerHOur,
-		Description:  deskripsi,
-	})
+	tx, erro := S.Store.DB.BeginTx(ctx, nil)
 
-	if err != nil {
-		return database.Room{}, err
+	if erro != nil {
+		tx.Rollback()
+		return database.Room{}, erro
 	}
 
-	return Rooms, nil
+	TXdb := store.NewTX(tx)
+
+	Errs := TXdb.RoomFasilitas.DeleteFasilitas_Ruangan(ctx, RoomID)
+
+	if Errs != nil {
+		tx.Rollback()
+		return database.Room{}, Errs
+	}
+
+	if UReq.nama == " " || UReq.deskripsi == " " || UReq.kapasitas <= 0 || UReq.PricePerHOur == " " {
+		return database.Room{}, errors.New("kolom tidak bileh kosong")
+	}
+
+	Room, errr := TXdb.Room.UpdateRoom(ctx, database.UpdateRoomParams{
+		Nama:         UReq.nama,
+		PricePerHour: UReq.PricePerHOur,
+		Description:  UReq.deskripsi,
+		Kapasitas:    UReq.kapasitas,
+		UpdatedAt:    time.Now(),
+		ID:           RoomID,
+	})
+
+	if errr != nil {
+		tx.Rollback()
+		return database.Room{}, errr
+	}
+
+	for _, id_fasilitas := range UReq.id_fasilitas {
+		_, erros := TXdb.RoomFasilitas.CreateFasilitas_Ruangan(ctx, database.CreateFasilitas_RuanganParams{
+			ID:          uuid.New(),
+			IDRoom:      Room.ID,
+			IDFasilitas: id_fasilitas,
+		})
+		if erros != nil {
+			tx.Rollback()
+			return database.Room{}, erros
+		}
+	}
+
+	errro := tx.Commit()
+
+	if errro != nil {
+		return database.Room{}, errro
+	}
+
+	return database.Room{}, nil
 }
 
 func (S *Service) DeletRooms(ctx context.Context, r *http.Request) error {
@@ -128,10 +237,33 @@ func (S *Service) DeletRooms(ctx context.Context, r *http.Request) error {
 	if errs != nil {
 		return errs
 	}
-	err := S.Store.Room.DeleteRoom(ctx, RoomsID)
+	tx, erro := S.Store.DB.BeginTx(ctx, nil)
+
+	if erro != nil {
+		tx.Rollback()
+		return erro
+	}
+
+	TXdb := store.NewTX(tx)
+
+	Errs := TXdb.RoomFasilitas.DeleteFasilitas_Ruangan(ctx, RoomsID)
+
+	if Errs != nil {
+		tx.Rollback()
+		return Errs
+	}
+
+	err := TXdb.Room.DeleteRoom(ctx, RoomsID)
 
 	if err != nil {
+		tx.Rollback()
 		return err
+	}
+
+	errr := tx.Commit()
+
+	if errr != nil {
+		return errr
 	}
 	return nil
 }

@@ -34,6 +34,3 @@ func (f fasilitas) Updatefasilitas(ctx context.Context, arg database.Updatefasil
 	return f.q.Updatefasilitas(ctx, arg)
 }
 
-func (f fasilitas) GetFasilitasByID(ctx context.Context, id uuid.UUID) (database.Fasilita, error) {
-	return f.q.GetFasilitasByID(ctx, id)
-}
