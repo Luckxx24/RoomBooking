@@ -59,11 +59,10 @@ func (S *Service) CreateRooms(ctx context.Context) (database.Room, error) {
 	tx, errs := S.Store.DB.BeginTx(ctx, nil)
 
 	if errs != nil {
-		defer tx.Rollback()
 		return database.Room{}, errs
 
 	}
-
+	defer tx.Rollback()
 	Txstore := store.NewTX(tx)
 
 	if Req.nama == " " || Req.deskripsi == " " || Req.kapasitas <= 0 || Req.PricePerHOur == " " {
@@ -89,7 +88,7 @@ func (S *Service) CreateRooms(ctx context.Context) (database.Room, error) {
 	})
 
 	if err != nil {
-		defer tx.Rollback()
+
 		return database.Room{}, err
 	}
 
@@ -104,7 +103,7 @@ func (S *Service) CreateRooms(ctx context.Context) (database.Room, error) {
 			IDFasilitas: id_fasilitas,
 		})
 		if erros != nil {
-			tx.Rollback()
+
 			return database.Room{}, erros
 		}
 	}
@@ -120,21 +119,14 @@ func (S *Service) CreateRooms(ctx context.Context) (database.Room, error) {
 
 func (S *Service) GetRooms(ctx context.Context, Page, Pagesize int) ([]database.GetRoomRow, error) {
 
-	HelperPage(Page, Pagesize)
+	Offset, Limit := HelperPage(Page, Pagesize)
 
-	tx, errs := S.Store.DB.Begin()
-
-	if errs != nil {
-		tx.Rollback()
-		return []database.GetRoomRow{}, errs
-	}
-
-	txdb := store.NewTX(tx)
-
-	Rooms, err := txdb.Room.GetRoom(ctx, database.GetRoomParams{})
+	Rooms, err := S.Store.Room.GetRoom(ctx, database.GetRoomParams{
+		Offset: int32(Offset),
+		Limit:  int32(Limit),
+	})
 
 	if err != nil {
-		tx.Rollback()
 		return []database.GetRoomRow{}, err
 	}
 
@@ -176,9 +168,9 @@ func (S *Service) UpdateRooms(ctx context.Context, nama, deskripsi string, kapas
 	}
 
 	tx, erro := S.Store.DB.BeginTx(ctx, nil)
-
+	defer tx.Rollback()
 	if erro != nil {
-		tx.Rollback()
+
 		return database.Room{}, erro
 	}
 
@@ -187,7 +179,7 @@ func (S *Service) UpdateRooms(ctx context.Context, nama, deskripsi string, kapas
 	Errs := TXdb.RoomFasilitas.DeleteFasilitas_Ruangan(ctx, RoomID)
 
 	if Errs != nil {
-		tx.Rollback()
+
 		return database.Room{}, Errs
 	}
 
@@ -205,7 +197,7 @@ func (S *Service) UpdateRooms(ctx context.Context, nama, deskripsi string, kapas
 	})
 
 	if errr != nil {
-		tx.Rollback()
+
 		return database.Room{}, errr
 	}
 
@@ -216,7 +208,7 @@ func (S *Service) UpdateRooms(ctx context.Context, nama, deskripsi string, kapas
 			IDFasilitas: id_fasilitas,
 		})
 		if erros != nil {
-			tx.Rollback()
+
 			return database.Room{}, erros
 		}
 	}
@@ -227,7 +219,7 @@ func (S *Service) UpdateRooms(ctx context.Context, nama, deskripsi string, kapas
 		return database.Room{}, errro
 	}
 
-	return database.Room{}, nil
+	return Room, nil
 }
 
 func (S *Service) DeletRooms(ctx context.Context, r *http.Request) error {
@@ -240,23 +232,25 @@ func (S *Service) DeletRooms(ctx context.Context, r *http.Request) error {
 	tx, erro := S.Store.DB.BeginTx(ctx, nil)
 
 	if erro != nil {
-		tx.Rollback()
+
 		return erro
 	}
 
 	TXdb := store.NewTX(tx)
 
+	defer tx.Rollback()
+
 	Errs := TXdb.RoomFasilitas.DeleteFasilitas_Ruangan(ctx, RoomsID)
 
 	if Errs != nil {
-		tx.Rollback()
+
 		return Errs
 	}
 
 	err := TXdb.Room.DeleteRoom(ctx, RoomsID)
 
 	if err != nil {
-		tx.Rollback()
+
 		return err
 	}
 
