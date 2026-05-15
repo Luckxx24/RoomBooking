@@ -9,7 +9,7 @@ import (
 	"github.com/luckxx24/RoomBooking/database"
 )
 
-func HelperGetIDone(ctx context.Context) (uuid.UUID, error) {
+func HelperGetIDUser(ctx context.Context) (uuid.UUID, error) {
 	UserIDstr, ok := middleware.GetIDFromContext(ctx)
 
 	if !ok {
@@ -48,7 +48,7 @@ func (S *Service) CreateUser(ctx context.Context, nama, email, HashPassword, Rol
 
 func (S *Service) GetUser(ctx context.Context) (database.GetUsersRow, error) {
 
-	UserID, errs := HelperGetIDone(ctx)
+	UserID, errs := HelperGetIDUser(ctx)
 
 	if errs != nil {
 		return database.GetUsersRow{}, errs
@@ -76,7 +76,7 @@ func (S *Service) GetUserlist(ctx context.Context, Page, PageSize int) ([]databa
 
 func (S *Service) UpdateUser(ctx context.Context, nama, email, haspassword string) (database.User, error) {
 
-	UserID, errs := HelperGetIDone(ctx)
+	UserID, errs := HelperGetIDUser(ctx)
 
 	if errs != nil {
 		return database.User{}, errs

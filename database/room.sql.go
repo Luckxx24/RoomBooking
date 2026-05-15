@@ -111,33 +111,49 @@ func (q *Queries) GetRoom(ctx context.Context, arg GetRoomParams) ([]GetRoomRow,
 	return items, nil
 }
 
-const getRoomDetail = `-- name: GetRoomDetail :one
+const getRoomBYID = `-- name: GetRoomBYID :one
 
-select r.nama,r.kapasitas,r.price_per_hour,r.kapasitas,b.status as booking_status from rooms r inner join booking b on b.id_rooms = r.id where r.id = $1 OFFSET $2 LIMIT $3
+select nama,price_per_hour from rooms where id = $1
 `
 
-type GetRoomDetailParams struct {
-	ID     uuid.UUID
-	Offset int32
-	Limit  int32
+type GetRoomBYIDRow struct {
+	Nama         string
+	PricePerHour string
 }
+
+func (q *Queries) GetRoomBYID(ctx context.Context, id uuid.UUID) (GetRoomBYIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getRoomBYID, id)
+	var i GetRoomBYIDRow
+	err := row.Scan(&i.Nama, &i.PricePerHour)
+	return i, err
+}
+
+const getRoomDetail = `-- name: GetRoomDetail :one
+
+select r.nama,r.kapasitas,r.price_per_hour,r.kapasitas,f.nama as room_fasilitas ,b.status as booking_status from rooms r 
+inner join booking b on b.id_rooms = r.id 
+inner join fasilitas_ruangan rf on rf.id_room = r.id 
+inner join fasilitas f on f.id = rf.id where r.id = $1
+`
 
 type GetRoomDetailRow struct {
 	Nama          string
 	Kapasitas     int32
 	PricePerHour  string
 	Kapasitas_2   int32
+	RoomFasilitas string
 	BookingStatus Stats
 }
 
-func (q *Queries) GetRoomDetail(ctx context.Context, arg GetRoomDetailParams) (GetRoomDetailRow, error) {
-	row := q.db.QueryRowContext(ctx, getRoomDetail, arg.ID, arg.Offset, arg.Limit)
+func (q *Queries) GetRoomDetail(ctx context.Context, id uuid.UUID) (GetRoomDetailRow, error) {
+	row := q.db.QueryRowContext(ctx, getRoomDetail, id)
 	var i GetRoomDetailRow
 	err := row.Scan(
 		&i.Nama,
 		&i.Kapasitas,
 		&i.PricePerHour,
 		&i.Kapasitas_2,
+		&i.RoomFasilitas,
 		&i.BookingStatus,
 	)
 	return i, err

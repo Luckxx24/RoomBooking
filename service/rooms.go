@@ -13,7 +13,7 @@ import (
 	"github.com/luckxx24/RoomBooking/store"
 )
 
-func HelperGetID(r *http.Request) (uuid.UUID, error) {
+func HelperGetIDRooms(r *http.Request) (uuid.UUID, error) {
 	RoomIDstr := chi.URLParam(r, "id_room")
 
 	if RoomIDstr == " " {
@@ -134,14 +134,12 @@ func (S *Service) GetRooms(ctx context.Context, Page, Pagesize int) ([]database.
 }
 
 func (S *Service) GetRoomsDetail(ctx context.Context, r *http.Request) (database.GetRoomDetailRow, error) {
-	id_room, errs := HelperGetID(r)
+	id_room, errs := HelperGetIDRooms(r)
 
 	if errs != nil {
 		return database.GetRoomDetailRow{}, errs
 	}
-	room, err := S.Store.Room.GetRoomDetail(ctx, database.GetRoomDetailParams{
-		ID: id_room,
-	})
+	room, err := S.Store.Room.GetRoomDetail(ctx, id_room)
 
 	if err != nil {
 		return database.GetRoomDetailRow{}, err
@@ -161,7 +159,7 @@ func (S *Service) UpdateRooms(ctx context.Context, nama, deskripsi string, kapas
 	}
 	var UReq URoomsFasility
 
-	RoomID, errs := HelperGetID(r)
+	RoomID, errs := HelperGetIDRooms(r)
 
 	if errs != nil {
 		return database.Room{}, errs
@@ -224,7 +222,7 @@ func (S *Service) UpdateRooms(ctx context.Context, nama, deskripsi string, kapas
 
 func (S *Service) DeletRooms(ctx context.Context, r *http.Request) error {
 
-	RoomsID, errs := HelperGetID(r)
+	RoomsID, errs := HelperGetIDRooms(r)
 
 	if errs != nil {
 		return errs
