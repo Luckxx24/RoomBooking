@@ -22,3 +22,8 @@ RETURNING *;
 -- name: DeleteBooking :exec
 
 Delete from booking where id = $1;
+
+-- name: CheckBookingAvailability :one
+
+Select count(*) from booking where id_rooms = $1 and status in ('Pending','done')
+and(start_time < $2 and end_time > $3 );

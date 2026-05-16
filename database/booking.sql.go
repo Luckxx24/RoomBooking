@@ -12,6 +12,25 @@ import (
 	"github.com/google/uuid"
 )
 
+const checkBookingAvailability = `-- name: CheckBookingAvailability :one
+
+Select count(*) from booking where id_rooms = $1 and status in ('Pending','done')
+and(start_time < $2 and end_time > $3 )
+`
+
+type CheckBookingAvailabilityParams struct {
+	IDRooms   uuid.UUID
+	StartTime time.Time
+	EndTime   time.Time
+}
+
+func (q *Queries) CheckBookingAvailability(ctx context.Context, arg CheckBookingAvailabilityParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, checkBookingAvailability, arg.IDRooms, arg.StartTime, arg.EndTime)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createBooking = `-- name: CreateBooking :one
 
 insert into booking(

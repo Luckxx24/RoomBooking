@@ -96,7 +96,7 @@ func (S *Service) UpdateUser(ctx context.Context, nama, email, haspassword strin
 }
 
 func (S *Service) DeletUser(ctx context.Context) error {
-	UserID, erro := HelperGetIDone(ctx)
+	UserID, erro := HelperGetIDUser(ctx)
 
 	if erro != nil {
 		return erro

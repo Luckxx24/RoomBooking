@@ -12,6 +12,7 @@ type Booking interface {
 	DeleteBooking(ctx context.Context, id uuid.UUID) error
 	GetBooking(ctx context.Context, arg database.GetBookingParams) ([]database.GetBookingRow, error)
 	UpdateBooking(ctx context.Context, arg database.UpdateBookingParams) (database.Booking, error)
+	CheckBookingAvailability(ctx context.Context, arg database.CheckBookingAvailabilityParams) (int64, error)
 }
 
 type booking struct {
@@ -32,4 +33,8 @@ func (b booking) GetBooking(ctx context.Context, arg database.GetBookingParams) 
 
 func (b booking) UpdateBooking(ctx context.Context, arg database.UpdateBookingParams) (database.Booking, error) {
 	return b.q.UpdateBooking(ctx, arg)
+}
+
+func (b booking) CheckBookingAvailability(ctx context.Context, arg database.CheckBookingAvailabilityParams) (int64, error) {
+	return b.q.CheckBookingAvailability(ctx, database.CheckBookingAvailabilityParams{})
 }

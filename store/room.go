@@ -13,7 +13,7 @@ type Room interface {
 	GetRoomDetail(ctx context.Context, id uuid.UUID) (database.GetRoomDetailRow, error)
 	UpdateRoom(ctx context.Context, arg database.UpdateRoomParams) (database.Room, error)
 	Createroom(ctx context.Context, arg database.CreateroomParams) (database.Room, error)
-	GetRoomBYID(ctx context.Context, id uuid.UUID) (string, error)
+	GetRoomBYID(ctx context.Context, id uuid.UUID) (database.GetRoomBYIDRow, error)
 }
 
 type room struct {
