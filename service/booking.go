@@ -15,19 +15,19 @@ import (
 )
 
 func HelperGetIDBooking(r *http.Request) (uuid.UUID, error) {
-	RoomIDstr := chi.URLParam(r, "id_room")
+	BookingIDstr := chi.URLParam(r, "id_booking")
 
-	if RoomIDstr == " " {
+	if BookingIDstr == " " {
 		return uuid.Nil, errors.New("gagal mendapatkan ID dari url param")
 	}
 
-	RoomsID, errs := uuid.Parse(RoomIDstr)
+	BookingID, errs := uuid.Parse(BookingIDstr)
 
 	if errs != nil {
 		return uuid.Nil, errs
 	}
 
-	return RoomsID, nil
+	return BookingID, nil
 }
 
 func HelperStatusBooking(s string) bool {
@@ -37,8 +37,32 @@ func HelperStatusBooking(s string) bool {
 	return false
 }
 
-func (S *Service) CreateBooking(ctx context.Context, StartTime, EndTime time.Time, TotalPrice string, r *http.Request, status string) (database.Booking, error) {
+func HelperPrice(StartTime, EndTime time.Time, PricePerHour string) (string, error) {
+	Selisih := EndTime.Sub(StartTime).Hours()
+	priceperHour, errosr := strconv.ParseFloat(PricePerHour, 32)
 
+	if errosr != nil {
+		return "", errosr
+	}
+
+	Totalprice := Selisih * priceperHour
+
+	totalPrice := decimal.NewFromFloat(Totalprice)
+
+	totalPricestr := totalPrice.StringFixed(2)
+
+	return totalPricestr, nil
+}
+
+func (S *Service) CreateBooking(ctx context.Context, StartTime, EndTime time.Time, r *http.Request) (database.Booking, error) {
+
+	if StartTime.IsZero() {
+		return database.Booking{}, errors.New("waktu mulai tidak boleh kosong")
+	}
+
+	if EndTime.IsZero() {
+		return database.Booking{}, errors.New("waktu selesai tidak boleh kosong")
+	}
 	IDRoom, errs := HelperGetIDRooms(r)
 
 	if errs != nil {
@@ -81,17 +105,11 @@ func (S *Service) CreateBooking(ctx context.Context, StartTime, EndTime time.Tim
 	if Availabler >= 1 {
 		return database.Booking{}, errors.New("Jadwal bertabrakan dengan jadwal lainnya")
 	}
+	totalPricestr, errro := HelperPrice(StartTime, EndTime, Room.PricePerHour)
 
-	Selisih := EndTime.Sub(StartTime).Hours()
-	priceperHour, errosr := strconv.ParseFloat(Room.PricePerHour, 32)
-
-	if errosr != nil {
-		return database.Booking{}, errosr
+	if errro != nil {
+		return database.Booking{}, errro
 	}
-
-	Totalprice := Selisih * priceperHour
-
-	totalPrice := decimal.NewFromFloat(Totalprice)
 
 	Booking, err := S.Store.Booking.CreateBooking(
 		ctx, database.CreateBookingParams{
@@ -100,8 +118,7 @@ func (S *Service) CreateBooking(ctx context.Context, StartTime, EndTime time.Tim
 			IDRooms:    IDRoom,
 			StartTime:  StartTime,
 			EndTime:    EndTime,
-			TotalPrice: totalPrice,
-			Status:     status,
+			TotalPrice: totalPricestr,
 		})
 
 	if err != nil {
@@ -125,14 +142,82 @@ func (S *Service) GetBooking(ctx context.Context, Page, PageSIze int) ([]databas
 	return Booking, nil
 }
 
-func ( S *Service) UpdateBooking(ctx context.Context)(){
-	S.Store.Booking.UpdateBooking(ctx,database.UpdateBookingParams{
-		  StartTime:
-    EndTime   : 
-    Status    : 
-    TotalPrice :
-    ID        : 
+func (S *Service) UpdateBooking(ctx context.Context, StartTime, EndTime time.Time, status string, r *http.Request) (database.Booking, error) {
+
+	ID, errs := HelperGetIDBooking(r)
+
+	if errs != nil {
+		return database.Booking{}, errs
+	}
+	if StartTime.IsZero() {
+		return database.Booking{}, errors.New("waktu mulai tidak boleh kosong")
+	}
+
+	if EndTime.IsZero() {
+		return database.Booking{}, errors.New("waktu selesai tidak boleh kosong")
+	}
+
+	if StartTime.After(EndTime) {
+		return database.Booking{}, errors.New("tidak boleh mengisi starttime setelah endtime")
+	}
+
+	if StartTime.Before(time.Now()) {
+		return database.Booking{}, errors.New("tidak boleh mengisi StartTIme di masa lalu")
+	}
+
+	IDRoom, errs := HelperGetIDRooms(r)
+
+	if errs != nil {
+		return database.Booking{}, errs
+	}
+
+	Room, erro := S.Store.Room.GetRoomBYID(ctx, IDRoom)
+
+	if erro == sql.ErrNoRows {
+		return database.Booking{}, errors.New("ID room tidak ditemukan")
+	}
+	if erro != nil {
+		return database.Booking{}, erro
+	}
+
+	totalpricestr, errrs := HelperPrice(StartTime, EndTime, Room.PricePerHour)
+
+	if errrs != nil {
+		return database.Booking{}, errrs
+	}
+
+	oke := HelperStatusBooking(status)
+
+	Availabler, erros := S.Store.Booking.CheckBookingAvailability(ctx, database.CheckBookingAvailabilityParams{
+		IDRooms:   IDRoom,
+		StartTime: StartTime,
+		EndTime:   EndTime,
 	})
+
+	if erros != nil {
+		return database.Booking{}, erros
+	}
+
+	if Availabler >= 1 {
+		return database.Booking{}, errors.New("Jadwal bertabrakan dengan jadwal lainnya")
+	}
+
+	if !oke {
+		return database.Booking{}, errors.New("format status salah")
+	}
+
+	Updated, err := S.Store.Booking.UpdateBooking(ctx, database.UpdateBookingParams{
+		StartTime:  StartTime,
+		EndTime:    EndTime,
+		Status:     database.Stats(status),
+		TotalPrice: totalpricestr,
+		ID:         ID,
+	})
+
+	if err != nil {
+		return database.Booking{}, err
+	}
+	return Updated, nil
 }
 
 func (S *Service) DeleteBooking(ctx context.Context, r *http.Request) error {
