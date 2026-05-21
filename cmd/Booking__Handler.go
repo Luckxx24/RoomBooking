@@ -8,7 +8,7 @@ import (
 	"github.com/luckxx24/RoomBooking/cmd/jsonresponse"
 )
 
-func (app Application) HandlerCreateFasilitas(w http.ResponseWriter, r http.Request) {
+func (app Application) HandlerCreateBooking(w http.ResponseWriter, r http.Request) {
 	type params struct {
 		nama     string
 		Password string
@@ -35,7 +35,7 @@ func (app Application) HandlerCreateFasilitas(w http.ResponseWriter, r http.Requ
 	jsonresponse.Succes(w, 201, User)
 }
 
-func (app Application) HandlerGetFasilitas(w http.ResponseWriter, r *http.Request) {
+func (app Application) HandlerGetBooking(w http.ResponseWriter, r *http.Request) {
 	User, err := app.Service.GetUser(r.Context())
 
 	if err != nil {
@@ -46,7 +46,7 @@ func (app Application) HandlerGetFasilitas(w http.ResponseWriter, r *http.Reques
 	jsonresponse.Succes(w, 201, User)
 }
 
-func (app Application) HandleUpdateFasilitas(w http.ResponseWriter, r *http.Request) {
+func (app Application) HandleUpdateBooking(w http.ResponseWriter, r *http.Request) {
 	type params struct {
 		nama     string
 		Password string
@@ -73,7 +73,7 @@ func (app Application) HandleUpdateFasilitas(w http.ResponseWriter, r *http.Requ
 	jsonresponse.Succes(w, 201, UpdateUser)
 }
 
-func (app Application) HandlerDeleteFasilitas(w http.ResponseWriter, r *http.Request) {
+func (app Application) HandlerDeleteBooking(w http.ResponseWriter, r *http.Request) {
 	err := app.Service.DeletUser(r.Context())
 
 	if err != nil {
