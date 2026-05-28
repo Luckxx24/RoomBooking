@@ -8,16 +8,14 @@ import (
 	"github.com/luckxx24/RoomBooking/cmd/jsonresponse"
 )
 
+type paramfasilitas struct {
+	nama string
+}
+
 func (app Application) HandlerCreateFasilitas(w http.ResponseWriter, r http.Request) {
-	type params struct {
-		nama     string
-		Password string
-		email    string
-		Role     string
-	}
 
 	decode := json.NewDecoder(r.Body)
-	param := &params{}
+	param := &paramfasilitas{}
 	errs := decode.Decode(&param)
 
 	if errs != nil {
@@ -25,37 +23,31 @@ func (app Application) HandlerCreateFasilitas(w http.ResponseWriter, r http.Requ
 		return
 	}
 
-	User, err := app.Service.CreateUser(r.Context(), param.nama, param.email, param.Password, param.Role)
+	fasilitas, err := app.Service.CreateFasilitas(r.Context(), param.nama)
 
 	if err != nil {
-		jsonresponse.RespondWithBadRequest(w, fmt.Sprintf("gagal menyimpan user %v", err))
+		jsonresponse.RespondWithBadRequest(w, fmt.Sprintf("gagal menyimpan fasilitas %v", err))
 		return
 	}
 
-	jsonresponse.Succes(w, 201, User)
+	jsonresponse.Succes(w, 201, fasilitas)
 }
 
 func (app Application) HandlerGetFasilitas(w http.ResponseWriter, r *http.Request) {
-	User, err := app.Service.GetUser(r.Context())
+	fasilitas, err := app.Service.GetAllFasilitas(r.Context())
 
 	if err != nil {
 		jsonresponse.RespondWithBadRequest(w, fmt.Sprintf("error ketika mendapatkan user %v", err))
 		return
 	}
 
-	jsonresponse.Succes(w, 201, User)
+	jsonresponse.Succes(w, 201, fasilitas)
 }
 
 func (app Application) HandleUpdateFasilitas(w http.ResponseWriter, r *http.Request) {
-	type params struct {
-		nama     string
-		Password string
-		email    string
-		Role     string
-	}
 
 	decode := json.NewDecoder(r.Body)
-	param := &params{}
+	param := &paramfasilitas{}
 	errs := decode.Decode(&param)
 
 	if errs != nil {
@@ -63,21 +55,21 @@ func (app Application) HandleUpdateFasilitas(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	UpdateUser, err := app.Service.UpdateUser(r.Context(), param.nama, param.email, param.Password)
+	Updatefasilitas, err := app.Service.Updatefasilitas(r.Context(), param.nama)
 
 	if err != nil {
-		jsonresponse.RespondWithBadRequest(w, fmt.Sprintf("gagal meng-update user %v", UpdateUser))
+		jsonresponse.RespondWithBadRequest(w, fmt.Sprintf("gagal meng-update user %v", Updatefasilitas))
 		return
 	}
 
-	jsonresponse.Succes(w, 201, UpdateUser)
+	jsonresponse.Succes(w, 201, Updatefasilitas)
 }
 
 func (app Application) HandlerDeleteFasilitas(w http.ResponseWriter, r *http.Request) {
-	err := app.Service.DeletUser(r.Context())
+	err := app.Service.DeleteFasilitas(r.Context(), r)
 
 	if err != nil {
-		jsonresponse.RespondWithBadRequest(w, fmt.Sprintf("gagal menghapuse User %v", err))
+		jsonresponse.RespondWithBadRequest(w, fmt.Sprintf("gagal menghapuse fasilitas %v", err))
 		return
 	}
 
